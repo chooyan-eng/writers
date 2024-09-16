@@ -10,7 +10,17 @@ Some users may want to use the system as a mobile app installed to their Android
 
 UI is interchangeable. Users can choose with what interface they interact with the system without changing businesslogic.
 
-Regardless of the interfaces, users can ask synonyms of "get" to the system, for instance, and can see the system replying "request", "fetch", "retrieve", etc would be possible as its answer.
+Regardless of the interfaces, users can ask synonyms of "get" to the system, for instance, and the system will display "request", "fetch", "retrieve", etc would be possible as its answer with whatever method.
 
-# Independent from Repository
+# No Business Logic
+
+UI never has business logics. Yet, it doesn't mean "UI doesn't have any logics". 
+
+UI *does* have logics on:
+
+- how its appearance should be changed depending on retrieved data
+- when it displays dialogs, navigates to other pages, etc.
+- how they manage app state
+
+All these are logics and can(should) be tested with the testing tool provided by each platform.
 

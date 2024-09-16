@@ -26,4 +26,21 @@ class FakeSynonymRepository implements SynonymRepository {
       ],
     );
   }
+
+  @override
+  Future<(Synonym, String)> askBest(
+      String word, String sentence, List<String> synonyms) async {
+    return (
+      Synonym(
+        word: synonyms.first,
+        examples: [
+          'This is an example sentence with the word ${synonyms.first}',
+          'This is another example sentence with the word ${synonyms.first}'
+        ],
+        explanation:
+            'This is a fake explanation for the word ${synonyms.first}',
+      ),
+      'This is a fake reason',
+    );
+  }
 }

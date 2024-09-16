@@ -15,9 +15,23 @@ class AskSynonymCommand {
 
   final SuggestSynonymUsecase _usecase;
 
-  Future<int> call(String word) async {
-    final result = await _usecase(word);
-    for (final synonym in result.synonyms) {
+  Future<int> call(String word, {String? sentence}) async {
+    final result = await _usecase(word, sentence: sentence);
+
+    if (result.suggested != null) {
+      print('*Suggested*');
+      print('${result.suggested!.word}: ${result.suggested!.explanation}');
+      print('');
+      for (final example in result.suggested!.examples) {
+        print('- $example');
+      }
+      print('');
+      print(result.reason);
+      print('');
+      print('-' * 10);
+    }
+
+    for (final synonym in result.synonyms.synonyms) {
       print('');
       print('${synonym.word}: ${synonym.explanation}');
       print('');
@@ -28,7 +42,7 @@ class AskSynonymCommand {
       print('=' * 10);
     }
     print('');
-    print(result.explanation);
+    print(result.synonyms.explanation);
     return 0;
   }
 }

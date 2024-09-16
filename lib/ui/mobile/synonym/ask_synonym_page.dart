@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intersperse/intersperse.dart';
 import 'package:writers/businesslogic/synonym/suggest_synonym_usecase.dart';
+import 'package:writers/businesslogic/synonym/synonym_suggestion.dart';
 import 'package:writers/businesslogic/synonym/synonyms.dart';
 import 'package:writers/main.dart';
 
@@ -13,8 +14,9 @@ class AskSynonymPage extends StatefulWidget {
 
 class _AskSynonymPageState extends State<AskSynonymPage> {
   String _word = '';
+  String _sentence = '';
   bool _isLoading = false;
-  Synonyms? _answer;
+  SynonymSuggestion? _answer;
   late final SuggestSynonymUsecase _usecase;
 
   @override
@@ -49,7 +51,10 @@ class _AskSynonymPageState extends State<AskSynonymPage> {
                       onPressed: () async {
                         FocusScope.of(context).unfocus();
                         setState(() => _isLoading = true);
-                        final result = await _usecase(_word);
+                        final result = await _usecase(
+                          _word,
+                          sentence: _sentence.isEmpty ? null : _sentence,
+                        );
                         setState(() {
                           _answer = result;
                           _isLoading = false;
@@ -59,32 +64,71 @@ class _AskSynonymPageState extends State<AskSynonymPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Synonyms',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  onChanged: (value) => setState(() => _sentence = value),
+                  decoration: const InputDecoration(
+                    labelText: 'Sentence(Optional)',
+                  ),
+                  minLines: 1,
+                  maxLines: 3,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 32),
               if (_answer != null)
                 Expanded(
                   child: ListView(
                     children: [
-                      ..._answer!.synonyms.map(
-                        (synonym) => Padding(
+                      if (_answer!.suggested != null) ...[
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'Best Suggested',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 12,
                           ),
-                          child: _SynonymTile(synonym),
+                          child: _SynonymTile(_answer!.suggested!),
+                        ),
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(_answer!.reason!),
+                        ),
+                        const SizedBox(height: 16),
+                        const Divider(),
+                      ],
+                      const SizedBox(height: 16),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'Synonyms',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(height: 8),
+                      ..._answer!.synonyms.synonyms
+                          .where((s) => s.word != _answer!.suggested?.word)
+                          .map(
+                            (synonym) => Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              child: _SynonymTile(synonym),
+                            ),
+                          ),
+                      const SizedBox(height: 8),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(_answer!.explanation),
+                        child: Text(_answer!.synonyms.explanation),
                       ),
                     ],
                   ),

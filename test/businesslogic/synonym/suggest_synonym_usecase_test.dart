@@ -15,15 +15,40 @@ void main() {
     );
   });
   group('when "get" is given', () {
-    test('foo and bar is returned', () async {
-      final actual = await usecase('get');
-      expect(actual.synonyms.length, 2);
+    group('when no sentence is given', () {
+      test('foo and bar is returned', () async {
+        final actual = await usecase('get');
+        expect(actual.synonyms.synonyms.length, 2);
+      });
+
+      test('no suggestion is returned', () async {
+        final actual = await usecase('get');
+        expect(actual.suggested, null);
+      });
+
+      test('the result is stored with key of "get"', () async {
+        final _ = await usecase('get');
+        expect(storage.synonyms.length, 1);
+        expect(storage.synonyms.keys.first, 'get');
+      });
     });
 
-    test('the result is stored with key of "get"', () async {
-      final _ = await usecase('get');
-      expect(storage.synonyms.length, 1);
-      expect(storage.synonyms.keys.first, 'get');
+    group('when sentence is also given', () {
+      test('foo and bar is returned as synoyms', () async {
+        final actual = await usecase(
+          'get',
+          sentence: 'The porpose of this function is to get the value.',
+        );
+        expect(actual.synonyms.synonyms.length, 2);
+      });
+
+      test('suggestion is returned', () async {
+        final actual = await usecase(
+          'get',
+          sentence: 'The porpose of this function is to get the value.',
+        );
+        expect(actual.suggested, isNotNull);
+      });
     });
   });
 }

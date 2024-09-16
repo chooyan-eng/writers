@@ -11,6 +11,7 @@ Future<void> main(List<String> args) async {
   parser.addOption('gemini-key', abbr: 'g');
   parser.addOption('action', abbr: 'a', allowed: ['synonym']);
   parser.addOption('word', abbr: 'w');
+  parser.addOption('sentence', abbr: 's');
 
   final results = parser.parse(args);
 
@@ -25,7 +26,7 @@ Future<void> main(List<String> args) async {
     'synonym' => await AskSynonymCommand(
         historyRepository: historyRepository,
         synonymRepository: synonymRepository,
-      )(results.option('word')!),
+      )(results.option('word')!, sentence: results.option('sentence')),
     _ => 1,
   };
   if (resultCode != 0) {

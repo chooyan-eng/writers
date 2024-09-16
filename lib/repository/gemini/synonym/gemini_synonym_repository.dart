@@ -15,7 +15,7 @@ class GeminiSynonymRepository implements SynonymRepository {
 
   @override
   Future<Synonyms> askSynonyms(String word) async {
-    final prompt = _buildPrompt(word);
+    final prompt = _buildSynonymsPrompt(word);
     final response = await _model.generateContent([Content.text(prompt)]);
     final jsonStr =
         response.text!.replaceFirst('```json', '').replaceFirst('```', '');
@@ -24,7 +24,7 @@ class GeminiSynonymRepository implements SynonymRepository {
     );
   }
 
-  String _buildPrompt(String word) {
+  String _buildSynonymsPrompt(String word) {
     return '''
 Can you list the words or phrases that are synonymous with the word "$word"? 
 In addition, generate a couple of example sentences for each word.
@@ -50,6 +50,43 @@ I don't need anything other than JSON strings.
     }
   ],
   "explanation": "Brief explanation about the difference between the words."
+}
+''';
+  }
+
+  @override
+  Future<(Synonym word, String reason)> askBest(
+    String word,
+    String sentence,
+    List<String> synonyms,
+  ) async {
+    final prompt = _buildBestPrompt(word, sentence, synonyms);
+    final response = await _model.generateContent([Content.text(prompt)]);
+    final jsonStr =
+        response.text!.replaceFirst('```json', '').replaceFirst('```', '');
+    final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+    return (Synonym.fromJson(json['synonym']), json['reason'] as String);
+  }
+
+  String _buildBestPrompt(String word, String sentence, List<String> synonyms) {
+    return '''
+You suggested the synonyms of the word "$word" as follows: ${synonyms.join(', ')}. 
+
+Given the sentence "$sentence", can you choose the best synonym for the word "$word", 
+considering I'm writing an article about software development.
+
+If the synonyms above doesn't fit the sentence, please provide a better one.
+
+Answer with the JSON format below so that I can parse it with programmatically.
+I don't need anything other than JSON strings.
+
+{
+  "synonym": {
+      "word": "synonym2",
+      "explanation": "Brief explanation about the word.",
+      "examples": [],
+  },
+  "reason": "Brief explanation about the difference between the words."
 }
 ''';
   }
